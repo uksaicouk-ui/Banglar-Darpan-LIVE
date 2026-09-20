@@ -1,0 +1,29 @@
+kind = "video"
+previewPath = "/banglar-darpan-live-video/"
+title = "Banglar Darpan LIVE — Product Film"
+description = "A cinematic animated product film introducing Banglar Darpan LIVE, its TV-style Bengali news viewer, Open Source Test lane, and browser-local control room."
+version = "1.0.0"
+id = "artifacts/banglar-darpan-live-video"
+router = "path"
+videoAspectRatio = "16:9"
+
+[[services]]
+name = "web"
+paths = [ "/banglar-darpan-live-video/" ]
+localPort = 25997
+
+[services.development]
+run = "pnpm --filter @workspace/banglar-darpan-live-video run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/banglar-darpan-live-video", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/banglar-darpan-live-video/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25997"
+BASE_PATH = "/banglar-darpan-live-video/"
