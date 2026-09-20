@@ -2,9 +2,11 @@ import {
   SafeFrame,
   VideoCanvas,
   type VideoAspectRatio,
+  VideoPausedContext,
   useVideoPlayer,
 } from '@/lib/video';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect } from 'react';
 
 import { Scene1 } from './video_scenes/Scene1';
 import { Scene2 } from './video_scenes/Scene2';
@@ -13,28 +15,50 @@ import { Scene4 } from './video_scenes/Scene4';
 import { Scene5 } from './video_scenes/Scene5';
 import { Scene6 } from './video_scenes/Scene6';
 
-const SCENE_DURATIONS = {
+export const SCENE_DURATIONS = {
   opening: 4200,
   lineup: 4800,
   viewer: 5200,
   test: 4600,
   control: 4800,
   close: 5200,
-};
+} as const;
 const VIDEO_ASPECT_RATIO: VideoAspectRatio = '16:9';
 
-export default function VideoTemplate() {
-  const { currentScene } = useVideoPlayer({
-    durations: SCENE_DURATIONS,
+interface VideoTemplateProps {
+  durations?: Record<string, number>;
+  loop?: boolean;
+  paused?: boolean;
+  onSceneChange?: (sceneKey: string) => void;
+}
+
+export default function VideoTemplate({
+  durations = SCENE_DURATIONS,
+  loop = true,
+  paused = false,
+  onSceneChange,
+}: VideoTemplateProps = {}) {
+  const { currentScene, currentSceneKey } = useVideoPlayer({
+    durations,
+    loop,
+    paused,
   });
 
+  useEffect(() => {
+    onSceneChange?.(currentSceneKey);
+  }, [currentSceneKey, onSceneChange]);
+
+  const baseSceneKey = currentSceneKey.replace(/_r[12]$/, '');
+  const sceneIndex = Object.keys(SCENE_DURATIONS).indexOf(baseSceneKey);
+
   return (
-    <VideoCanvas
-      aspectRatio={VIDEO_ASPECT_RATIO}
-      className="bd-film"
-      style={{ backgroundColor: 'var(--color-bg-light)' }}
-    >
-      <SafeFrame>
+    <VideoPausedContext.Provider value={paused}>
+      <VideoCanvas
+        aspectRatio={VIDEO_ASPECT_RATIO}
+        className="bd-film"
+        style={{ backgroundColor: 'var(--color-bg-light)' }}
+      >
+        <SafeFrame>
         <motion.div
           className="absolute inset-0"
           style={{ background: 'radial-gradient(circle at 77% 16%, rgba(232,93,63,.16), transparent 28%)' }}
@@ -53,14 +77,14 @@ export default function VideoTemplate() {
           animate={{ x: ['0vw', '-8vw', '0vw'], y: ['0vw', '-4vw', '0vw'], opacity: [.25, .95, .25] }}
           transition={{ duration: 6.5, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden" data-scene-index={sceneIndex}>
           <AnimatePresence mode="sync" initial={false}>
-            {currentScene === 0 && <Scene1 key="scene-opening" />}
-            {currentScene === 1 && <Scene2 key="scene-lineup" />}
-            {currentScene === 2 && <Scene3 key="scene-viewer" />}
-            {currentScene === 3 && <Scene4 key="scene-test" />}
-            {currentScene === 4 && <Scene5 key="scene-control" />}
-            {currentScene === 5 && <Scene6 key="scene-close" />}
+            {sceneIndex === 0 && <Scene1 key={currentSceneKey} />}
+            {sceneIndex === 1 && <Scene2 key={currentSceneKey} />}
+            {sceneIndex === 2 && <Scene3 key={currentSceneKey} />}
+            {sceneIndex === 3 && <Scene4 key={currentSceneKey} />}
+            {sceneIndex === 4 && <Scene5 key={currentSceneKey} />}
+            {sceneIndex === 5 && <Scene6 key={currentSceneKey} />}
           </AnimatePresence>
         </div>
         <motion.div
@@ -71,7 +95,8 @@ export default function VideoTemplate() {
         >
           DHAKA DESK / CONTINUOUS SIGNAL
         </motion.div>
-      </SafeFrame>
-    </VideoCanvas>
+        </SafeFrame>
+      </VideoCanvas>
+    </VideoPausedContext.Provider>
   );
 }

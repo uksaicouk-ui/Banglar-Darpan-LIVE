@@ -245,3 +245,135 @@ body {
 .bd-scanline { animation: bd-scan 4s linear infinite; }
 .bd-pulse { animation: bd-pulse 2.2s ease-in-out infinite; }
 .bd-ticker { animation: bd-ticker 16s linear infinite; }
+
+.film-with-controls {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.film-control-sensor {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  height: 25%;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.film-control-filler { flex: 1 1 auto; width: 100%; }
+
+.film-control-bar {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  width: 100%;
+  padding: .8rem 1.2rem;
+  color: var(--color-text-primary);
+  background: rgba(9, 17, 31, .86);
+  border-top: 1px solid rgba(246, 240, 223, .14);
+  backdrop-filter: blur(18px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(100%);
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.film-control-bar.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.film-control-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.8rem;
+  height: 2.8rem;
+  color: rgba(246, 240, 223, .7);
+  border: 1px solid transparent;
+  border-radius: .5rem;
+  background: transparent;
+  cursor: pointer;
+  transition: color .2s ease, background .2s ease, border-color .2s ease;
+}
+
+.film-control-button:hover,
+.film-control-button:focus-visible,
+.film-control-button.is-active {
+  color: var(--color-text-primary);
+  border-color: rgba(245, 201, 106, .24);
+  background: rgba(246, 240, 223, .1);
+  outline: none;
+}
+
+.film-control-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: .2rem .15rem;
+  background: rgba(246, 240, 223, .14);
+}
+
+.film-progress {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: .35rem;
+}
+
+.film-progress-segment {
+  position: relative;
+  flex: 1 1 0%;
+  height: .45rem;
+  min-width: .8rem;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(246, 240, 223, .2);
+  cursor: pointer;
+  transition: height .2s ease, background .2s ease;
+}
+
+.film-progress-segment:hover,
+.film-progress-segment:focus-visible {
+  height: .6rem;
+  background: rgba(246, 240, 223, .3);
+  outline: none;
+}
+
+.film-progress-segment span {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.film-scene-count,
+.film-time {
+  flex: 0 0 auto;
+  color: rgba(246, 240, 223, .7);
+  font-family: var(--font-mono);
+  font-size: clamp(.65rem, .75vw, .85rem);
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.film-time {
+  min-width: 10rem;
+  color: rgba(246, 240, 223, .85);
+  text-align: right;
+}
+
+@media (max-width: 700px) {
+  .film-control-bar { gap: .35rem; padding: .6rem .7rem; }
+  .film-control-button { width: 2.3rem; height: 2.3rem; }
+  .film-time { min-width: 7.8rem; font-size: .58rem; }
+  .film-scene-count { font-size: .58rem; }
+}
