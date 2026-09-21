@@ -1,0 +1,2 @@
+- [Clerk authentication](clerk-auth.md) — Banglar Darpan uses Replit-managed Clerk with cookie-based web sessions and branded path-based auth routes.
+- [Vite deployment defaults](vite-deployment-defaults.md) — workspace Vite builds need safe defaults when Vercel omits PORT and BASE_PATH.

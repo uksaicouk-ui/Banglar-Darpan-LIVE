@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent } from 'react';
-import { Link, Route, Switch, useLocation } from 'wouter';
+import { Link, Redirect, Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
+import { ClerkProvider, SignIn, SignUp, useAuth, useClerk, useUser } from '@clerk/react';
+import { publishableKeyFromHost } from '@clerk/react/internal';
+import { shadcn } from '@clerk/themes';
 import {
   ArrowLeft,
   ChevronRight,
@@ -25,7 +28,7 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -42,6 +45,69 @@ const DEFAULT_CHANNELS: Channel[] = [
 ];
 const STORAGE_KEY = 'banglar-darpan-channels';
 const queryClient = new QueryClient();
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+const clerkPubKey = publishableKeyFromHost(
+  window.location.hostname,
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
+);
+const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
+
+function stripBase(path: string) {
+  return basePath && path.startsWith(basePath)
+    ? path.slice(basePath.length) || '/'
+    : path;
+}
+
+const clerkAppearance = {
+  theme: shadcn,
+  cssLayerName: 'clerk',
+  options: {
+    logoPlacement: 'inside' as const,
+    logoLinkUrl: basePath || '/',
+    logoImageUrl: `${window.location.origin}${basePath}/logo.svg`,
+    socialButtonsPlacement: 'top' as const,
+    socialButtonsVariant: 'blockButton' as const,
+  },
+  variables: {
+    colorPrimary: '#d85b3f',
+    colorForeground: '#f5f0df',
+    colorMutedForeground: '#a8a9b7',
+    colorDanger: '#ff8f79',
+    colorBackground: '#15172a',
+    colorInput: '#0f1120',
+    colorInputForeground: '#f5f0df',
+    colorNeutral: '#45465a',
+    fontFamily: 'Manrope, sans-serif',
+    borderRadius: '0.7rem',
+  },
+  elements: {
+    rootBox: 'w-full flex justify-center',
+    cardBox: 'bg-[#15172a] rounded-2xl w-[440px] max-w-full overflow-hidden',
+    card: '!shadow-none !border-0 !bg-transparent !rounded-none',
+    footer: '!shadow-none !border-0 !bg-transparent !rounded-none',
+    headerTitle: 'text-[#f5f0df] font-semibold',
+    headerSubtitle: 'text-[#a8a9b7]',
+    socialButtonsBlockButtonText: 'text-[#f5f0df]',
+    formFieldLabel: 'text-[#d8d5cb]',
+    footerActionLink: 'text-[#ffe082]',
+    footerActionText: 'text-[#a8a9b7]',
+    dividerText: 'text-[#a8a9b7]',
+    identityPreviewEditButton: 'text-[#ffe082]',
+    formFieldSuccessText: 'text-[#81c995]',
+    alertText: 'text-[#ffb4a4]',
+    logoBox: 'h-16',
+    logoImage: 'max-h-16',
+    socialButtonsBlockButton: 'border-[#45465a] bg-[#202238] hover:bg-[#2a2c45]',
+    formButtonPrimary: 'bg-[#d85b3f] hover:bg-[#ef7456] text-[#fff8ed]',
+    formFieldInput: 'border-[#45465a] bg-[#0f1120] text-[#f5f0df]',
+    footerAction: 'border-t border-[#35364b]',
+    dividerLine: 'bg-[#35364b]',
+    alert: 'border-[#75483f] bg-[#2a1c23]',
+    otpCodeFieldInput: 'border-[#45465a] bg-[#0f1120] text-[#f5f0df]',
+    formFieldRow: 'text-[#d8d5cb]',
+    main: 'bg-transparent',
+  },
+};
 
 function readChannels(): Channel[] {
   try {
@@ -80,6 +146,36 @@ function Brand() {
   );
 }
 
+function AuthActions() {
+  const { isLoaded, isSignedIn, user } = useUser();
+  const { signOut } = useClerk();
+
+  if (!isLoaded) return null;
+
+  if (isSignedIn) {
+    const name = user?.firstName || user?.emailAddresses[0]?.emailAddress || 'Account';
+    return (
+      <div className="bd-auth-actions">
+        <span className="bd-auth-user" title={name}>{name}</span>
+        <button
+          type="button"
+          className="bd-auth-button"
+          onClick={() => void signOut({ redirectUrl: basePath || '/' })}
+        >
+          Sign out
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bd-auth-actions">
+      <Link href="/sign-in" className="bd-auth-link">Sign in</Link>
+      <Link href="/sign-up" className="bd-auth-button">Create account</Link>
+    </div>
+  );
+}
+
 function Header() {
   const [location] = useLocation();
   return (
@@ -93,6 +189,7 @@ function Header() {
         <Link href="/admin" className={`bd-header-link ${location === '/admin' ? 'active' : ''}`} data-testid="link-admin">
           <Settings2 size={14} /><span>Admin</span>
         </Link>
+        <AuthActions />
       </div>
     </header>
   );
@@ -367,21 +464,158 @@ function AdminPage({ channels, setChannels }: { channels: Channel[]; setChannels
   );
 }
 
+function SignInPage() {
+  return (
+    <div className="bd-auth-page">
+      <SignIn
+        routing="path"
+        path={`${basePath}/sign-in`}
+        signUpUrl={`${basePath}/sign-up`}
+        fallbackRedirectUrl={`${basePath}/user-portal`}
+        appearance={clerkAppearance}
+      />
+    </div>
+  );
+}
+
+function SignUpPage() {
+  return (
+    <div className="bd-auth-page">
+      <SignUp
+        routing="path"
+        path={`${basePath}/sign-up`}
+        signInUrl={`${basePath}/sign-in`}
+        fallbackRedirectUrl={`${basePath}/user-portal`}
+        appearance={clerkAppearance}
+      />
+    </div>
+  );
+}
+
+function AuthLoadingPage() {
+  return (
+    <div className="bd-auth-loading">
+      <span className="bd-mark" aria-hidden="true" />
+      <p>Connecting to the broadcast desk…</p>
+    </div>
+  );
+}
+
+function HomeRedirect({ channels }: { channels: Channel[] }) {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return <AuthLoadingPage />;
+  return isSignedIn ? <Redirect to="/user-portal" /> : <HomePage channels={channels} />;
+}
+
+function UserPortalPage({ channels }: { channels: Channel[] }) {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return <AuthLoadingPage />;
+  return isSignedIn ? <HomePage channels={channels} /> : <Redirect to="/" />;
+}
+
+function AdminGate({
+  channels,
+  setChannels,
+}: {
+  channels: Channel[];
+  setChannels: (channels: Channel[]) => void;
+}) {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (!isLoaded) return <AuthLoadingPage />;
+  return isSignedIn ? (
+    <AdminPage channels={channels} setChannels={setChannels} />
+  ) : (
+    <Redirect to="/sign-in" />
+  );
+}
+
+function ClerkQueryClientCacheInvalidator() {
+  const { addListener } = useClerk();
+  const client = useQueryClient();
+  const previousUserId = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    const unsubscribe = addListener(({ user }) => {
+      const nextUserId = user?.id ?? null;
+      if (
+        previousUserId.current !== undefined &&
+        previousUserId.current !== nextUserId
+      ) {
+        client.clear();
+      }
+      previousUserId.current = nextUserId;
+    });
+    return unsubscribe;
+  }, [addListener, client]);
+
+  return null;
+}
+
 function AppRouter() {
   const [channels, setChannelsState] = useState<Channel[]>(readChannels);
+  const [location] = useLocation();
   const setChannels = (next: Channel[]) => { setChannelsState(next); localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); };
   return (
-    <ErrorBoundary resetKey={location.pathname}>
+    <ErrorBoundary resetKey={location}>
       <Switch>
+        <Route path="/sign-in/*?" component={SignInPage} />
+        <Route path="/sign-up/*?" component={SignUpPage} />
         <Route path="/test" component={TestPage} />
-        <Route path="/admin">{() => <AdminPage channels={channels} setChannels={setChannels} />}</Route>
-        <Route path="/" component={() => <HomePage channels={channels} />} />
+        <Route path="/admin">{() => <AdminGate channels={channels} setChannels={setChannels} />}</Route>
+        <Route path="/user-portal">{() => <UserPortalPage channels={channels} />}</Route>
+        <Route path="/">{() => <HomeRedirect channels={channels} />}</Route>
         <Route component={NotFound} />
       </Switch>
     </ErrorBoundary>
   );
 }
 
+function ClerkProviderWithRoutes() {
+  const [, setLocation] = useLocation();
+
+  return (
+    <ClerkProvider
+      publishableKey={clerkPubKey}
+      proxyUrl={clerkProxyUrl}
+      appearance={clerkAppearance}
+      signInUrl={`${basePath}/sign-in`}
+      signUpUrl={`${basePath}/sign-up`}
+      localization={{
+        signIn: {
+          start: {
+            title: 'Welcome back to the desk',
+            subtitle: 'Sign in to manage your Banglar Darpan lineup',
+          },
+        },
+        signUp: {
+          start: {
+            title: 'Create your desk account',
+            subtitle: 'Save your access to the Banglar Darpan control room',
+          },
+        },
+      }}
+      routerPush={(to) => setLocation(stripBase(to))}
+      routerReplace={(to) => setLocation(stripBase(to), { replace: true })}
+    >
+      <QueryClientProvider client={queryClient}>
+        <ClerkQueryClientCacheInvalidator />
+        <TooltipProvider>
+          <AppRouter />
+          <Toaster />
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ClerkProvider>
+  );
+}
+
 export default function App() {
-  return <QueryClientProvider client={queryClient}><TooltipProvider><AppRouter /><Toaster /></TooltipProvider></QueryClientProvider>;
+  if (!clerkPubKey) {
+    throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in the environment.');
+  }
+
+  return (
+    <WouterRouter base={basePath}>
+      <ClerkProviderWithRoutes />
+    </WouterRouter>
+  );
 }

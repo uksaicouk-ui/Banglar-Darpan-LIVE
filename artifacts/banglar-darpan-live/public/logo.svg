@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 150" role="img" aria-labelledby="title desc">
+  <title id="title">বাংলার দর্পণ LIVE</title>
+  <desc id="desc">Banglar Darpan LIVE newsroom mark</desc>
+  <rect width="116" height="116" x="12" y="17" rx="28" fill="#d85b3f"/>
+  <circle cx="70" cy="75" r="35" fill="none" stroke="#ffe082" stroke-width="7"/>
+  <circle cx="70" cy="75" r="10" fill="#ffe082"/>
+  <path d="M70 27v18M70 105V87M22 75h18M100 75H82" stroke="#ffe082" stroke-width="5" stroke-linecap="round"/>
+  <text x="150" y="76" fill="#f5f0df" font-family="Noto Serif Bengali, Georgia, serif" font-size="45" font-weight="700">বাংলার দর্পণ</text>
+  <text x="153" y="119" fill="#ffe082" font-family="DM Mono, monospace" font-size="18" letter-spacing="6">LIVE BROADCAST DESK</text>
+</svg>
