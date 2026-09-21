@@ -1,5 +1,7 @@
+@layer theme, base, clerk, components, utilities;
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Noto+Serif+Bengali:wght@500;600;700&display=swap');
 @import 'tailwindcss';
+@import '@clerk/themes/shadcn.css';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
 
@@ -372,12 +374,21 @@ button { cursor: pointer; }
 .bd-modal-head { display:flex; align-items:start; justify-content:space-between; gap:20px; }
 .bd-modal-head h2 { margin:0; font:600 20px var(--app-font-serif); }
 .bd-admin-empty { padding:40px 20px; text-align:center; color:#888797; font-size:12px; }
+.bd-auth-actions { display:flex; align-items:center; gap:8px; }
+.bd-auth-user { max-width:130px; overflow:hidden; color:#b8b7c4; font:10px var(--app-font-mono); text-overflow:ellipsis; white-space:nowrap; }
+.bd-auth-link, .bd-auth-button { display:inline-flex; align-items:center; justify-content:center; min-height:30px; padding:0 11px; border:1px solid rgba(241,231,206,.16); border-radius:7px; color:#f1e7ce; font:600 10px var(--app-font-mono); letter-spacing:.04em; text-decoration:none; text-transform:uppercase; background:rgba(255,255,255,.04); cursor:pointer; transition:background .2s ease,border-color .2s ease,color .2s ease; }
+.bd-auth-link:hover, .bd-auth-button:hover, .bd-auth-link:focus-visible, .bd-auth-button:focus-visible { border-color:rgba(255,224,130,.45); color:#ffe082; background:rgba(255,224,130,.08); outline:none; }
+.bd-auth-button { border-color:rgba(216,91,63,.5); background:#d85b3f; color:#fff8ed; }
+.bd-auth-button:hover, .bd-auth-button:focus-visible { border-color:#ef7456; color:#fff8ed; background:#ef7456; }
+.bd-auth-page { display:flex; min-height:100dvh; align-items:center; justify-content:center; padding:28px 16px; background:radial-gradient(circle at 15% 10%, rgba(216,91,63,.18), transparent 28%),radial-gradient(circle at 86% 85%, rgba(255,224,130,.08), transparent 30%),#0f1120; }
+.bd-auth-loading { display:flex; min-height:100dvh; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:#b8b7c4; font:11px var(--app-font-mono); letter-spacing:.08em; text-transform:uppercase; }
+.bd-auth-loading .bd-mark { width:48px; height:48px; }
 .bd-back { display:inline-flex; align-items:center; gap:7px; color:#aaa9b7; text-decoration:none; font:10px var(--app-font-mono); letter-spacing:.08em; margin-bottom:18px; }
 .bd-back:hover { color:#ffe082; }
 .bd-crumb { display:flex; align-items:center; gap:9px; color:#77778a; font:10px var(--app-font-mono); margin-bottom:8px; }
 @keyframes bd-pulse { 0%,100% { box-shadow:0 0 0 0 rgba(237,81,73,.5); } 50% { box-shadow:0 0 0 5px rgba(237,81,73,0); } }
 @media (max-width: 900px) { .bd-layout { grid-template-columns:1fr; } .bd-sidebar { border-right:0; border-bottom:1px solid rgba(236,226,198,.1); padding:18px; } .bd-side-heading { margin-bottom:14px; } .bd-playlist { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); } .bd-channel.selected::before { left:9px; right:9px; top:auto; bottom:-19px; width:auto; height:2px; } .bd-test-card { display:none; } .bd-main { padding:28px 20px 38px; } }
-@media (max-width: 640px) { .bd-header { height:65px; padding:0 15px; } .bd-brand-sub, .bd-header-link span { display:none; } .bd-brand-title { font-size:14px; } .bd-live-dot { padding:7px; font-size:9px; } .bd-layout { min-height:calc(100dvh - 65px); } .bd-sidebar { padding:15px 12px 13px; } .bd-side-kicker { font-size:9px; } .bd-side-heading { font-size:17px; margin:6px 0 13px; } .bd-channel { padding:9px 7px; grid-template-columns:30px 1fr; gap:8px; } .bd-channel-index { width:28px; height:28px; } .bd-channel .bd-chevron, .bd-channel-meta { display:none; } .bd-main { padding:22px 12px 32px; } .bd-main-intro { display:block; margin-bottom:17px; } .bd-main-note { text-align:left; margin-top:10px; } .bd-player { min-height:220px; } .bd-player-live { top:11px; left:11px; padding:6px 8px; } .bd-watermark { top:13px; right:12px; font-size:12px; } .bd-player-caption { left:12px; bottom:12px; max-width:70%; } .bd-stage-foot { padding:12px; } .bd-form-grid { grid-template-columns:1fr; } .bd-admin-toolbar { align-items:stretch; flex-direction:column; } .bd-admin-row { grid-template-columns:27px 1fr auto; gap:8px; } .bd-admin-row.head { display:none; } .bd-admin-url { grid-column:2 / 3; } .bd-admin-actions { grid-column:3; grid-row:1 / span 2; } }
+@media (max-width: 640px) { .bd-header { height:65px; padding:0 15px; } .bd-brand-sub, .bd-header-link span, .bd-auth-user { display:none; } .bd-brand-title { font-size:14px; } .bd-live-dot { padding:7px; font-size:9px; } .bd-layout { min-height:calc(100dvh - 65px); } .bd-sidebar { padding:15px 12px 13px; } .bd-side-kicker { font-size:9px; } .bd-side-heading { font-size:17px; margin:6px 0 13px; } .bd-channel { padding:9px 7px; grid-template-columns:30px 1fr; gap:8px; } .bd-channel-index { width:28px; height:28px; } .bd-channel .bd-chevron, .bd-channel-meta { display:none; } .bd-main { padding:22px 12px 32px; } .bd-main-intro { display:block; margin-bottom:17px; } .bd-main-note { text-align:left; margin-top:10px; } .bd-player { min-height:220px; } .bd-player-live { top:11px; left:11px; padding:6px 8px; } .bd-watermark { top:13px; right:12px; font-size:12px; } .bd-player-caption { left:12px; bottom:12px; max-width:70%; } .bd-stage-foot { padding:12px; } .bd-form-grid { grid-template-columns:1fr; } .bd-admin-toolbar { align-items:stretch; flex-direction:column; } .bd-admin-row { grid-template-columns:27px 1fr auto; gap:8px; } .bd-admin-row.head { display:none; } .bd-admin-url { grid-column:2 / 3; } .bd-admin-actions { grid-column:3; grid-row:1 / span 2; } }
 
 /**
  * Using the elevate system.
